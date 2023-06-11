@@ -21,17 +21,21 @@
                     'table-bordered' => $bordered,
                     'table-hover'    => $hoverable,
                ])>
-            <thead>
-                <tr>
-                    @foreach($columns as $column)
-                        {!! $column->buildTh() !!}
-                    @endforeach
-                </tr>
-            </thead>
+
+            @if($showHeader)
+                <thead>
+                    <tr>
+                        @foreach($columns as $column)
+                            {!! $column->buildTh() !!}
+                        @endforeach
+                    </tr>
+                </thead>
+            @endif
+
             <tbody>
 
             @foreach($rows as $source)
-                <tr @class($rowClass($source)) data-table-advanced-rowlink="{{$rowLink($source)}}">
+                <tr @class($rowClass($source))>
                     @foreach($columns as $column)
                         {!! $column->buildTd($source) !!}
                     @endforeach

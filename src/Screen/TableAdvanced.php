@@ -14,29 +14,22 @@ abstract class TableAdvanced extends Table
 {
     protected $template = 'platform::layouts.tableAdvanced';
 
-    /**
-     * @param Repository $repository
-     *
-     * @return null|Factory
-     */
+
     public function build(Repository $repository)
     {
         $this->query = $repository;
 
-        if (!$this->isSee()) {
-            return null;
+        if (! $this->isSee()) {
+            return;
         }
 
-        $columns = collect($this->columns())->filter(static function (TD $column) {
-            return $column->isSee();
-        });
+        $columns = collect($this->columns())->filter(static fn (TD $column) => $column->isSee());
 
-        $total = collect($this->total())->filter(static function (TD $column) {
-            return $column->isSee();
-        });
+        $total = collect($this->total())->filter(static fn (TD $column) => $column->isSee());
 
-        $rows = $repository->getContent($this->target);
-        $rows = is_array($rows) ? collect($rows) : $rows;
+        $content = $repository->getContent($this->target);
+
+        $rows = is_a($content, \Illuminate\Contracts\Pagination\Paginator::class) ? $content : collect()->merge($content);
 
         return view($this->template, [
             'repository'   => $repository,
@@ -52,9 +45,9 @@ abstract class TableAdvanced extends Table
             'hoverable'    => $this->hoverable(),
             'slug'         => $this->getSlug(),
             'onEachSide'   => $this->onEachSide(),
+            'showHeader'   => $this->hasHeader($columns, $rows),
             'title'        => $this->title,
             'rowClass'     => [$this, 'rowClass'],
-            'rowLink'      => [$this, 'rowLink'],
         ]);
     }
 
@@ -68,15 +61,6 @@ abstract class TableAdvanced extends Table
         return null;
     }
 
-    /**
-     * @param Repository|Model $row
-     *
-     * @return string|null
-     */
-    public function rowLink($row)
-    {
-        return null;
-    }
 
     /**
      * Enable a hover state on table rows.
