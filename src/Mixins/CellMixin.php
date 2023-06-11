@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Lintaba\OrchidTables\Mixins;
 
+use BenSampo\Enum\Enum;
 use Carbon\CarbonImmutable;
 use Carbon\Exceptions\InvalidFormatException;
 use DateTimeInterface;
@@ -232,6 +233,21 @@ class CellMixin
                 return e($value->name ?? $value->slug ?? $value::class . '@' . $value->id);
             });
 
+            return $this;
+        };
+    }
+
+    public static function enum(): callable
+    {
+        return function (): self {
+            $column = $this->column;
+            $this->render(function ($datum) use ($column) {
+                if ($datum->$column instanceof Enum) {
+                    return $datum->$column->description;
+                } else {
+                    return $this;
+                }
+            });
             return $this;
         };
     }
